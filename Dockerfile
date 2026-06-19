@@ -7,7 +7,6 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN DATABASE_URL="postgresql://p:p@localhost:5432/db" npx prisma generate
 RUN npm run build
 
 FROM node:22-alpine AS runner
@@ -23,10 +22,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-RUN printf '#!/bin/sh\nset -e\necho "Applying database schema..."\nnpx prisma db push --skip-generate\necho "Starting Next.js server..."\nexec node server.js\n' > /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
 
 RUN chown -R nextjs:nodejs /app
 
