@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, FolderKanban } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const projects = await prisma.project.findMany({
     orderBy: { createdAt: "desc" },
