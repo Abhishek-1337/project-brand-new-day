@@ -1,26 +1,140 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: var(--color-primary-val);
+  --color-primary-dark: var(--color-primary-dark-val);
+  --color-secondary: var(--color-secondary-val);
+  --color-accent: var(--color-accent-val);
+  --color-surface: var(--color-surface-val);
+  --color-surface-light: var(--color-surface-light-val);
+  --color-surface-lighter: var(--color-surface-lighter-val);
+  --color-border: var(--color-border-val);
+  --color-text: var(--color-text-val);
+  --color-text-muted: var(--color-text-muted-val);
+  --color-text-dim: var(--color-text-dim-val);
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary-val: #f97316;
+  --color-primary-dark-val: #ea580c;
+  --color-secondary-val: #14b8a6;
+  --color-accent-val: #f43f5e;
+  --color-surface-val: #faf6f1;
+  --color-surface-light-val: #ffffff;
+  --color-surface-lighter-val: #f1ede8;
+  --color-border-val: #e5e0db;
+  --color-text-val: #1c1917;
+  --color-text-muted-val: #57534e;
+  --color-text-dim-val: #a8a29e;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --color-primary-val: #fb923c;
+  --color-primary-dark-val: #f97316;
+  --color-secondary-val: #2dd4bf;
+  --color-accent-val: #fb7185;
+  --color-surface-val: #0a0a0f;
+  --color-surface-light-val: #12121a;
+  --color-surface-lighter-val: #1a1a24;
+  --color-border-val: #1e1e2e;
+  --color-text-val: #f1f5f9;
+  --color-text-muted-val: #94a3b8;
+  --color-text-dim-val: #64748b;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary-val) transparent;
+  }
+
+  body {
+    background: var(--color-surface-val);
+    color: var(--color-text-val);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    background: var(--color-primary-val);
+    color: white;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility glass-hover {
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(249, 115, 22, 0.25);
+  }
+}
+
+@utility gradient-text {
+  background: linear-gradient(135deg, var(--color-primary-val), var(--color-secondary-val));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility gradient-border {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--color-primary-val), var(--color-secondary-val), var(--color-accent-val));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@utility glow {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.15), 0 0 40px rgba(20, 184, 166, 0.05);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
 }
