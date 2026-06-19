@@ -41,7 +41,7 @@ export default async function Home() {
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            {session ? (
+            {/* {session ? (
               <Link
                 href="/admin"
                 className="rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-medium text-white transition-all hover:shadow-lg hover:shadow-primary/25"
@@ -55,7 +55,7 @@ export default async function Home() {
               >
                 Admin
               </Link>
-            )}
+            )} */}
           </div>
         </div>
       </nav>
@@ -63,13 +63,13 @@ export default async function Home() {
       {/* Hero */}
       <section className="relative px-4 py-24 text-center">
         <div className="mx-auto max-w-4xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs text-primary">
+          {/* <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs text-primary">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
             </span>
             Portfolio
-          </div>
+          </div> */}
           <h1 className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">
             Projects I&apos;ve{" "}
             <span className="gradient-text">Built</span>
