@@ -25,7 +25,8 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/scripts ./scripts
+
+RUN printf '#!/bin/sh\nset -e\necho "Applying database schema..."\nnpx prisma db push --skip-generate\necho "Starting Next.js server..."\nexec node server.js\n' > /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
 
 RUN chown -R nextjs:nodejs /app
 
@@ -36,4 +37,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
