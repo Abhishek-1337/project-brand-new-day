@@ -11,4 +11,4 @@ build
 *.md
 .eslintrc*
 .prettierrc*
-tsconfig.json
+# tsconfig.json needed for @/ path aliases
