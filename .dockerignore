@@ -1,0 +1,14 @@
+.next
+.git
+.gitignore
+.env
+.env.local
+node_modules
+.next
+out
+build
+.DS_Store
+*.md
+.eslintrc*
+.prettierrc*
+tsconfig.json
