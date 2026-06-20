@@ -1,21 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { X, Plus, ArrowLeft, Loader2 } from "lucide-react";
+import { X, Plus, ArrowLeft, Loader2, Upload, ImageIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function NewProjectPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [techInput, setTechInput] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
+  const [imageUrl, setImageUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function addTech() {
     const tech = techInput.trim();
@@ -29,6 +31,31 @@ export default function NewProjectPage() {
     setTechStack(techStack.filter((t) => t !== tech));
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      setImageUrl(data.url);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -38,7 +65,7 @@ export default function NewProjectPage() {
     const data = {
       title: formData.get("title"),
       description: formData.get("description"),
-      image: formData.get("image") || null,
+      image: imageUrl || formData.get("image") || null,
       githubUrl: formData.get("githubUrl") || null,
       liveUrl: formData.get("liveUrl") || null,
       featured: formData.get("featured") === "on",
@@ -92,12 +119,59 @@ export default function NewProjectPage() {
                 placeholder="My Awesome Project"
                 required
               />
-              <Input
-                id="image"
-                name="image"
-                label="Cover Image URL"
-                placeholder="https://example.com/image.jpg"
-              />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-text-muted">
+                  Cover Image
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-surface-light px-3 py-2 text-sm text-text-muted transition-all hover:border-primary/50 hover:text-text"
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploading ? "Uploading..." : "Upload Image"}
+                  </button>
+                </div>
+                {imageUrl && (
+                  <div className="relative mt-2 overflow-hidden rounded-lg border border-border">
+                    <img
+                      src={imageUrl}
+                      alt="Preview"
+                      className="h-24 w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl("")}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-surface/80 text-text-dim hover:text-accent"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                <p className="text-xs text-text-dim">
+                  Or paste a URL below
+                </p>
+                <Input
+                  id="image"
+                  name="image"
+                  placeholder="https://example.com/image.jpg"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+              </div>
             </div>
 
             <Textarea

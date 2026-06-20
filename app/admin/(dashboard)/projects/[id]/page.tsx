@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { X, Plus, ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { X, Plus, ArrowLeft, Loader2, Trash2, Upload } from "lucide-react";
 import Link from "next/link";
 
 interface Project {
@@ -26,10 +26,13 @@ export default function EditProjectPage() {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [techInput, setTechInput] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
   const [project, setProject] = useState<Project | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch(`/api/projects/${params.id}`)
@@ -37,6 +40,7 @@ export default function EditProjectPage() {
       .then((data) => {
         setProject(data);
         setTechStack(data.techStack);
+        setImageUrl(data.image || "");
         setLoading(false);
       })
       .catch(() => {
@@ -57,6 +61,31 @@ export default function EditProjectPage() {
     setTechStack(techStack.filter((t) => t !== tech));
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      setImageUrl(data.url);
+    } catch {
+      setError("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
@@ -67,7 +96,7 @@ export default function EditProjectPage() {
     const data = {
       title: formData.get("title"),
       description: formData.get("description"),
-      image: formData.get("image") || null,
+      image: imageUrl || null,
       githubUrl: formData.get("githubUrl") || null,
       liveUrl: formData.get("liveUrl") || null,
       featured: formData.get("featured") === "on",
@@ -165,13 +194,59 @@ export default function EditProjectPage() {
                 defaultValue={project.title}
                 required
               />
-              <Input
-                id="image"
-                name="image"
-                label="Cover Image URL"
-                defaultValue={project.image || ""}
-                placeholder="https://example.com/image.jpg"
-              />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-text-muted">
+                  Cover Image
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-surface-light px-3 py-2 text-sm text-text-muted transition-all hover:border-primary/50 hover:text-text"
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploading ? "Uploading..." : "Upload Image"}
+                  </button>
+                </div>
+                {imageUrl && (
+                  <div className="relative mt-2 overflow-hidden rounded-lg border border-border">
+                    <img
+                      src={imageUrl}
+                      alt="Preview"
+                      className="h-24 w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl("")}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-surface/80 text-text-dim hover:text-accent"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                <p className="text-xs text-text-dim">
+                  Or paste a URL below
+                </p>
+                <Input
+                  id="image"
+                  name="image"
+                  placeholder="https://example.com/image.jpg"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+              </div>
             </div>
 
             <Textarea
