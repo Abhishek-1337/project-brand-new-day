@@ -1,16 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Pencil, ExternalLink } from "lucide-react";
-import { FaGithub } from "react-icons/fa6";
+import { Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DeleteProjectButton } from "@/components/delete-project-button";
-import { formatDistanceToNow } from "date-fns";
+import { ProjectDragList } from "@/components/project-drag-list";
 
 export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
 
   return (
@@ -59,93 +56,7 @@ export default async function ProjectsPage() {
           </Link>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {projects.map((project) => (
-            <Card
-              key={project.id}
-              hover
-              className="group relative flex flex-col"
-            >
-              {/* Image */}
-              {project.image && (
-                <div className="-mx-6 -mt-6 mb-4 overflow-hidden rounded-t-xl">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-              )}
-
-              <div className="flex-1 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-white group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h3>
-                  {project.featured && (
-                    <Badge variant="primary" className="shrink-0">
-                      Featured
-                    </Badge>
-                  )}
-                </div>
-
-                <p className="line-clamp-2 text-sm text-text-muted">
-                  {project.description}
-                </p>
-
-                {project.techStack.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.techStack.map((tech) => (
-                      <Badge key={tech} variant="secondary">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 pt-2">
-                  {project.githubUrl && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      className="flex items-center gap-1 text-xs text-text-dim transition-colors hover:text-white"
-                    >
-                      <FaGithub className="h-3.5 w-3.5" />
-                      Code
-                    </a>
-                  )}
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      className="flex items-center gap-1 text-xs text-text-dim transition-colors hover:text-white"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Live
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions overlay */}
-              <div className="absolute right-3 top-3 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-                <Link
-                  href={`/admin/projects/${project.id}`}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-lighter text-text-dim transition-colors hover:bg-primary/20 hover:text-primary"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Link>
-                <DeleteProjectButton projectId={project.id} />
-              </div>
-
-              <div className="mt-3 border-t border-border pt-3 text-xs text-text-dim">
-                {formatDistanceToNow(new Date(project.createdAt), {
-                  addSuffix: true,
-                })}
-              </div>
-            </Card>
-          ))}
-        </div>
+        <ProjectDragList projects={projects} />
       )}
     </div>
   );

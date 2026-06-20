@@ -9,7 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 export default async function AdminDashboard() {
   const session = await auth();
   const projects = await prisma.project.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     take: 5,
   });
   const totalProjects = await prisma.project.count();

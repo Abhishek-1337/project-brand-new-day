@@ -54,6 +54,7 @@ export async function PATCH(
         liveUrl: body.liveUrl || null,
         featured: body.featured || false,
         techStack: body.techStack || [],
+        sortOrder: body.sortOrder !== undefined ? body.sortOrder : undefined,
       },
     });
 

@@ -10,7 +10,7 @@ export async function GET() {
     }
 
     const projects = await prisma.project.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
 
     return NextResponse.json(projects);
@@ -31,6 +31,9 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    const maxOrder = await prisma.project.aggregate({ _max: { sortOrder: true } });
+    const nextOrder = (maxOrder._max.sortOrder ?? -1) + 1;
+
     const project = await prisma.project.create({
       data: {
         title: body.title,
@@ -40,6 +43,7 @@ export async function POST(request: Request) {
         liveUrl: body.liveUrl || null,
         featured: body.featured || false,
         techStack: body.techStack || [],
+        sortOrder: nextOrder,
       },
     });
 
