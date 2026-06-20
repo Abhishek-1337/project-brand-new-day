@@ -1,8 +1,20 @@
 #!/bin/sh
 set -e
 
-echo "Applying database schema..."
-npx prisma db push --skip-generate
+# Optional startup schema sync. Enable only when explicitly requested.
+if [ "${PRISMA_DB_PUSH_ON_STARTUP:-false}" = "true" ]; then
+  echo "Applying database schema..."
+
+  if [ -x /app/node_modules/.bin/prisma ] || command -v prisma >/dev/null 2>&1; then
+    if [ -x /app/node_modules/.bin/prisma ]; then
+      /app/node_modules/.bin/prisma db push --skip-generate
+    else
+      npx prisma db push --skip-generate
+    fi
+  else
+    echo "Prisma CLI not found in runtime image; skipping schema push."
+  fi
+fi
 
 # If running as root (Docker default), set up upload directory permissions
 # then drop privileges to the nextjs user
